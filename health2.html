@@ -6,6 +6,9 @@
     <title>HealthMate AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -13,7 +16,6 @@
     <style>
         body {
             font-family: 'Outfit', sans-serif;
-            /* Bluish Glassy Theme */
             background: linear-gradient(120deg, #e0f2fe 0%, #f0f9ff 50%, #bfdbfe 100%);
             height: 100vh;
             overflow: hidden;
@@ -117,21 +119,30 @@
     </div>
 
     <!-- 2. LOGIN PAGE -->
-    <div id="screen-login" class="absolute inset-0 z-50 bg-white/40 backdrop-blur-md overflow-y-auto custom-scroll hidden">
-        <div class="min-h-full flex items-center justify-center p-6">
-            <div class="glass w-full max-w-md p-10 rounded-[2rem] shadow-2xl fade-in relative overflow-hidden">
-                 <button onclick="hideLogin()" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 transition">✕</button>
+    <div id="screen-login" class="hidden absolute inset-0 z-50 bg-white/40 backdrop-blur-md flex flex-col overflow-y-auto custom-scroll">
+        <nav class="w-full p-6 flex justify-between items-center max-w-7xl mx-auto sticky top-0 z-50">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-lg">H</div>
+                <span class="text-2xl font-bold text-slate-800 tracking-tight">HealthMate <span class="text-blue-600">AI</span></span>
+            </div>
+            <button onclick="hideLogin()" class="text-slate-500 hover:text-slate-800 font-semibold flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg> Back
+            </button>
+        </nav>
+
+        <div class="flex-1 flex items-center justify-center p-6 fade-in">
+            <div class="glass w-full max-w-md p-10 rounded-[2rem] shadow-2xl border border-white/60 my-auto relative">
                 <div class="text-center mb-8">
-                    <div class="w-16 h-16 bg-gradient-to-tr from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold shadow-lg">H</div>
-                    <h1 class="text-3xl font-bold text-slate-800">HealthMate</h1>
-                    <p class="text-slate-500 mt-2 text-sm font-medium">Your Smart Virtual Health Companion</p>
+                    <h1 class="text-3xl font-bold text-slate-800">Welcome Back</h1>
+                    <p class="text-slate-500 mt-2 text-sm font-medium">Complete details to access dashboard</p>
                 </div>
 
-                <form id="login-form" class="space-y-5">
+                <form id="login-form" class="space-y-4">
                     <div>
                         <label class="text-xs font-bold text-slate-400 uppercase ml-1">Full Name</label>
                         <input type="text" id="login-name" required class="glass-input w-full px-4 py-3.5 rounded-xl mt-1 text-slate-800" placeholder="e.g. Amit Kumar">
                     </div>
+                    
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="text-xs font-bold text-slate-400 uppercase ml-1">Age</label>
@@ -146,11 +157,34 @@
                             </select>
                         </div>
                     </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                         <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase ml-1">Phone</label>
+                            <input type="tel" id="login-phone" class="glass-input w-full px-4 py-3.5 rounded-xl mt-1 text-slate-800" placeholder="9876...">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase ml-1">Email</label>
+                            <input type="email" id="login-email" class="glass-input w-full px-4 py-3.5 rounded-xl mt-1 text-slate-800" placeholder="user@email.com">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase ml-1">Height (cm)</label>
+                            <input type="number" id="login-height" class="glass-input w-full px-4 py-3.5 rounded-xl mt-1 text-slate-800" placeholder="175">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase ml-1">Weight (kg)</label>
+                            <input type="number" id="login-weight" class="glass-input w-full px-4 py-3.5 rounded-xl mt-1 text-slate-800" placeholder="70">
+                        </div>
+                    </div>
+
                     <div>
                         <label class="text-xs font-bold text-slate-400 uppercase ml-1">Location</label>
                         <input type="text" id="login-loc" required class="glass-input w-full px-4 py-3.5 rounded-xl mt-1 text-slate-800" placeholder="City">
                     </div>
-                    <button type="submit" class="w-full py-4 mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all transform hover:scale-[1.02] active:scale-95">
+                    <button type="submit" class="w-full py-4 mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all transform hover:scale-[1.02] active:scale-95">
                         Access Dashboard
                     </button>
                 </form>
@@ -171,7 +205,7 @@
                 <button onclick="showServices()" class="hover:text-blue-600 transition-colors px-4 py-2 rounded-lg hover:bg-blue-50 font-bold">Health Features</button>
                 <button onclick="document.getElementById('modal-contact').classList.remove('hidden')" class="hover:text-blue-600 transition-colors">Contact</button>
                 <button onclick="location.reload()" class="text-red-500 hover:underline ml-4">Logout</button>
-                <div id="user-avatar" class="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm border border-blue-200">U</div>
+                <button onclick="openProfile()" id="user-avatar" class="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm border border-blue-200 hover:bg-blue-200 transition">U</button>
             </div>
         </nav>
 
@@ -205,10 +239,8 @@
         </div>
     </div>
 
-    <!-- 4. SERVICES PAGE (Full Screen Overlay) -->
+    <!-- 4. SERVICES PAGE -->
     <div id="screen-services" class="hidden absolute inset-0 z-[50] bg-[#f0f7ff] flex flex-col slide-up">
-        
-        <!-- Header with Exit Button -->
         <div class="h-24 px-8 flex justify-between items-center bg-white/50 backdrop-blur-md sticky top-0 z-40">
             <div>
                 <h2 class="text-3xl font-bold text-slate-800">Health Services</h2>
@@ -219,11 +251,9 @@
             </button>
         </div>
 
-        <!-- Services Grid -->
         <div class="flex-1 overflow-y-auto p-8 custom-scroll">
             <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                
-                <!-- 1. Medicine Card -->
+                <!-- Medicine Card -->
                 <div class="glass-card bg-white p-6 h-96 flex flex-col relative group">
                     <div class="flex justify-between items-start mb-4">
                         <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-2xl">💊</div>
@@ -231,27 +261,10 @@
                     </div>
                     <h3 class="font-bold text-slate-800 text-xl mb-1">Medicines</h3>
                     <p class="text-sm text-slate-400 mb-4">Daily Schedule</p>
-                    
-                    <div id="med-list" class="flex-1 overflow-y-auto custom-scroll space-y-3 pr-1">
-                        <!-- Mock Data -->
-                        <div class="p-3 bg-emerald-50/50 rounded-xl border border-emerald-100 flex justify-between items-center">
-                            <div>
-                                <p class="font-bold text-slate-700 text-sm">Vitamin C</p>
-                                <p class="text-xs text-slate-500">9:00 AM</p>
-                            </div>
-                            <input type="checkbox" class="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500">
-                        </div>
-                        <div class="p-3 bg-emerald-50/50 rounded-xl border border-emerald-100 flex justify-between items-center">
-                            <div>
-                                <p class="font-bold text-slate-700 text-sm">Omega 3</p>
-                                <p class="text-xs text-slate-500">1:00 PM</p>
-                            </div>
-                            <input type="checkbox" class="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500">
-                        </div>
-                    </div>
+                    <div id="med-list" class="flex-1 overflow-y-auto custom-scroll space-y-3 pr-1"></div>
                 </div>
 
-                <!-- 2. Appointments Card -->
+                <!-- Appointments Card -->
                 <div class="glass-card bg-white p-6 h-96 flex flex-col relative group">
                     <div class="flex justify-between items-start mb-4">
                         <div class="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center text-purple-600 text-2xl">📅</div>
@@ -259,42 +272,24 @@
                     </div>
                     <h3 class="font-bold text-slate-800 text-xl mb-1">Appointments</h3>
                     <p class="text-sm text-slate-400 mb-4">Upcoming Visits</p>
-                    
-                    <div id="appt-list" class="flex-1 overflow-y-auto custom-scroll space-y-3 pr-1">
-                         <!-- Mock Data -->
-                         <div class="p-3 bg-purple-50/50 rounded-xl border border-purple-100">
-                            <p class="font-bold text-slate-700 text-sm">Dr. Anjali Sharma</p>
-                            <p class="text-xs text-purple-600 font-medium mt-1">Cardiologist • Tomorrow 10 AM</p>
-                        </div>
-                         <div class="p-3 bg-purple-50/50 rounded-xl border border-purple-100">
-                            <p class="font-bold text-slate-700 text-sm">Dr. Rajesh Kumar</p>
-                            <p class="text-xs text-purple-600 font-medium mt-1">Dentist • Friday 4 PM</p>
-                        </div>
-                    </div>
+                    <div id="appt-list" class="flex-1 overflow-y-auto custom-scroll space-y-3 pr-1"></div>
                 </div>
 
-                <!-- 3. Water Card -->
+                <!-- Water Card -->
                 <div class="glass-card bg-white p-6 h-96 flex flex-col relative group items-center justify-center text-center" onclick="addWater()">
                     <div class="w-24 h-24 bg-cyan-100 rounded-full flex items-center justify-center text-cyan-600 text-4xl mb-6 shadow-inner">💧</div>
                     <h3 class="font-bold text-slate-800 text-2xl mb-1">Hydration</h3>
                     <p class="text-sm text-slate-400 mb-6">Daily Goal</p>
-                    
                     <div class="text-5xl font-extrabold text-cyan-500 mb-4" id="water-count-display">0<span class="text-2xl text-cyan-300">/8</span></div>
-                    
-                    <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden mb-4">
-                        <div id="water-bar" class="bg-cyan-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
-                    </div>
+                    <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden mb-4"><div id="water-bar" class="bg-cyan-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div></div>
                     <p class="text-xs text-slate-400">Click anywhere to add glass</p>
                 </div>
 
-                <!-- 4. Report Vault -->
+                <!-- Report Vault -->
                 <div class="glass-card bg-white p-6 h-96 flex flex-col relative group">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600 text-2xl">📂</div>
-                    </div>
+                    <div class="flex justify-between items-start mb-4"><div class="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600 text-2xl">📂</div></div>
                     <h3 class="font-bold text-slate-800 text-xl mb-1">Report Vault</h3>
                     <p class="text-sm text-slate-400 mb-6">Secure Storage</p>
-                    
                     <div class="flex-1 bg-slate-50 rounded-xl border border-dashed border-slate-300 flex flex-col items-center justify-center p-4 text-center cursor-pointer hover:bg-orange-50 hover:border-orange-300 transition" onclick="document.getElementById('file-input').click()">
                         <svg class="w-10 h-10 text-slate-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                         <p class="text-sm font-bold text-slate-600">Upload Report</p>
@@ -302,164 +297,172 @@
                     </div>
                     <input type="file" id="file-input" class="hidden" onchange="alert('File secured in Local Vault')">
                 </div>
-
             </div>
         </div>
     </div>
 
+    <!-- PROFILE MODAL (With Scroll and Close) -->
+    <div id="modal-profile" class="hidden fixed inset-0 z-[80] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="glass w-full max-w-md p-8 rounded-[2rem] shadow-2xl fade-in relative overflow-hidden max-h-[90vh] overflow-y-auto custom-scroll">
+            <button onclick="document.getElementById('modal-profile').classList.add('hidden')" class="absolute top-4 right-4 p-2 bg-white/50 rounded-full text-slate-500 hover:text-red-500 hover:bg-red-50 transition z-20"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            <div class="text-center mb-6 relative z-10 mt-4">
+                <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-3 text-white text-3xl font-bold shadow-lg" id="profile-avatar">U</div>
+                <h3 class="text-2xl font-bold text-slate-800" id="profile-name">User Name</h3>
+                <p class="text-blue-500 font-medium text-sm">Patient Profile</p>
+            </div>
+            <div class="space-y-3 relative z-10">
+                <div class="p-4 bg-white/60 rounded-xl border border-white/50 flex justify-between items-center"><span class="text-slate-500 text-sm font-medium">Last Login</span><span class="text-slate-800 font-bold text-sm" id="profile-last-login">Just now</span></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="p-3 bg-white/60 rounded-xl border border-white/50"><p class="text-slate-400 text-xs uppercase font-bold">Age / Sex</p><p class="text-slate-800 font-bold"><span id="profile-age">--</span> / <span id="profile-gender">--</span></p></div>
+                    <div class="p-3 bg-white/60 rounded-xl border border-white/50"><p class="text-slate-400 text-xs uppercase font-bold">Location</p><p class="text-slate-800 font-bold truncate" id="profile-loc">--</p></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="p-3 bg-white/60 rounded-xl border border-white/50"><p class="text-slate-400 text-xs uppercase font-bold">Height</p><p class="text-slate-800 font-bold"><span id="profile-height">--</span> cm</p></div>
+                    <div class="p-3 bg-white/60 rounded-xl border border-white/50"><p class="text-slate-400 text-xs uppercase font-bold">Weight</p><p class="text-slate-800 font-bold"><span id="profile-weight">--</span> kg</p></div>
+                </div>
+                <div class="p-3 bg-white/60 rounded-xl border border-white/50 flex flex-col gap-1">
+                     <p class="text-slate-400 text-xs uppercase font-bold">Contact</p>
+                     <p class="text-slate-800 text-sm truncate" id="profile-email">--</p>
+                     <p class="text-slate-800 text-sm" id="profile-phone">--</p>
+                </div>
+                <div class="p-4 bg-white/60 rounded-xl border border-white/50"><p class="text-slate-400 text-xs uppercase font-bold mb-2">Next Appointment</p><div class="flex items-center gap-3"><div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600">📅</div><div><p class="text-sm font-bold text-slate-700" id="profile-next-appt">None Scheduled</p></div></div></div>
+                 <div class="p-4 bg-white/60 rounded-xl border border-white/50"><p class="text-slate-400 text-xs uppercase font-bold mb-2">Active Medicine</p><div class="flex items-center gap-3"><div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600">💊</div><div><p class="text-sm font-bold text-slate-700" id="profile-active-med">None</p></div></div></div>
+            </div>
+            <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-blue-50 to-transparent -z-0"></div>
+        </div>
+    </div>
 
     <!-- CHAT MODAL -->
     <div id="tab-chat" class="hidden fixed inset-0 z-[60] bg-white flex flex-col animate-fade-in">
         <div class="h-20 border-b border-slate-100 flex justify-between items-center px-6 md:px-10 bg-white/80 backdrop-blur-md">
             <button onclick="closeChat()" class="text-slate-500 hover:text-blue-600 flex items-center gap-2 text-lg font-bold transition">
-                <div class="p-2 bg-slate-100 rounded-full hover:bg-blue-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></div>
-                Back to Home
+                <div class="p-2 bg-slate-100 rounded-full hover:bg-blue-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></div> Back to Home
             </button>
-            <div class="flex items-center gap-3">
-                <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <span class="font-bold text-slate-800 text-lg">Live AI Consultation</span>
-            </div>
+            <div class="flex items-center gap-3"><div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div><span class="font-bold text-slate-800 text-lg">Live AI Consultation</span></div>
             <button id="download-pdf-btn" class="text-sm bg-blue-50 text-blue-600 px-4 py-2 rounded-xl font-bold hover:bg-blue-100 transition border border-blue-200">Export Report</button>
         </div>
-
         <div id="chat-container" class="flex-1 overflow-y-auto p-6 md:p-10 space-y-6 custom-scroll bg-slate-50">
-            <div class="text-center py-12 text-slate-400 text-sm">
-                <div class="w-20 h-20 bg-white rounded-full mx-auto mb-4 flex items-center justify-center shadow-sm border border-slate-100 text-4xl">🩺</div>
-                <p class="text-lg font-medium text-slate-600">AI Assistant Ready.</p>
-                <p>Describe your symptoms to begin.</p>
-            </div>
+            <div class="text-center py-12 text-slate-400 text-sm"><div class="w-20 h-20 bg-white rounded-full mx-auto mb-4 flex items-center justify-center shadow-sm border border-slate-100 text-4xl">🩺</div><p class="text-lg font-medium text-slate-600">AI Assistant Ready.</p><p>Describe your symptoms to begin.</p></div>
         </div>
-
         <div class="p-6 bg-white border-t border-slate-100">
-             <div id="image-preview-box" class="hidden mb-3 relative w-fit p-1 bg-slate-50 rounded-xl border border-slate-200 shadow-sm">
-                <img id="img-preview" class="h-20 rounded-lg">
-                <button onclick="clearImage()" class="absolute -top-2 -right-2 bg-slate-700 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center text-xs shadow-md hover:bg-red-500 transition">✕</button>
-            </div>
+             <div id="image-preview-box" class="hidden mb-3 relative w-fit p-1 bg-slate-50 rounded-xl border border-slate-200 shadow-sm"><img id="img-preview" class="h-20 rounded-lg"><button onclick="clearImage()" class="absolute -top-2 -right-2 bg-slate-700 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center text-xs shadow-md hover:bg-red-500 transition">✕</button></div>
             <div class="flex gap-3 items-center bg-slate-50 border border-slate-200 rounded-2xl p-2 pr-3 transition-all focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 max-w-5xl mx-auto">
-                <button onclick="document.getElementById('file-input-chat').click()" class="p-3 text-slate-400 hover:text-blue-600 hover:bg-white rounded-xl transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                </button>
+                <button onclick="document.getElementById('file-input-chat').click()" class="p-3 text-slate-400 hover:text-blue-600 hover:bg-white rounded-xl transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></button>
                 <input type="file" id="file-input-chat" class="hidden" accept="image/*">
-                
                 <input type="text" id="chat-input" class="flex-1 bg-transparent border-none focus:ring-0 text-slate-700 placeholder-slate-400 text-lg" placeholder="Type your symptoms here...">
-                
-                <button id="mic-btn" class="p-3 text-slate-400 hover:text-blue-600 hover:bg-white rounded-xl transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
-                </button>
-                
-                <button id="send-btn" class="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md transition-all transform active:scale-95">
-                    <svg class="w-6 h-6 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                </button>
+                <button id="mic-btn" class="p-3 text-slate-400 hover:text-blue-600 hover:bg-white rounded-xl transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg></button>
+                <button id="send-btn" class="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md transition-all transform active:scale-95"><svg class="w-6 h-6 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg></button>
             </div>
         </div>
     </div>
 
-    <!-- MODALS (Add Item, Contact, Emergency, API) -->
-    
-    <div id="add-modal" class="hidden fixed inset-0 z-[80] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm p-8 rounded-[2rem] shadow-2xl fade-in transform transition-all scale-100">
-            <h3 class="text-2xl font-bold text-slate-800 mb-6" id="modal-title">Add Item</h3>
-            <input type="text" id="modal-input-1" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 mb-4 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition" placeholder="Name">
-            <input type="text" id="modal-input-2" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 mb-6 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition" placeholder="Time">
-            <div class="flex gap-3">
-                <button onclick="closeAddModal()" class="flex-1 py-3.5 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition">Cancel</button>
-                <button id="modal-save-btn" class="flex-1 py-3.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-500/30">Save</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-contact" class="hidden fixed inset-0 z-[80] bg-slate-900/30 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm p-8 rounded-2xl shadow-2xl fade-in text-center relative">
-            <button onclick="document.getElementById('modal-contact').classList.add('hidden')" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition">✕</button>
-            <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-5 text-blue-600 text-2xl">📞</div>
-            <h3 class="text-2xl font-bold text-slate-800 mb-8">Support Center</h3>
-            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 mb-4">
-                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Emergency Hotline</div>
-                <div class="text-2xl font-mono font-bold text-slate-800">444 444 444 2</div>
-            </div>
-            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100">
-                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Email Support</div>
-                <div class="text-lg text-blue-600 font-medium">help@healthmate.ai</div>
-            </div>
-        </div>
-    </div>
-
-    <div id="emergency-modal" class="hidden fixed inset-0 z-[90] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-red-900/80 backdrop-blur-md"></div>
-        <div class="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden fade-in border-4 border-red-100">
-            <div class="bg-red-50 p-8 text-center border-b border-red-100">
-                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600 text-3xl shadow-sm">⚠️</div>
-                <h2 class="text-3xl font-bold text-red-900">Emergency Alert</h2>
-            </div>
-            <div class="p-8 max-h-[60vh] overflow-y-auto custom-scroll">
-                <p id="emergency-msg" class="text-center text-slate-700 text-lg font-medium mb-6">Immediate attention recommended.</p>
-                <div id="hospitals-list" class="bg-slate-50 rounded-2xl p-6 text-slate-600 space-y-3 hidden border border-slate-200"></div>
-            </div>
-            <div class="p-6 bg-slate-50 border-t border-slate-100">
-                <button onclick="document.getElementById('emergency-modal').classList.add('hidden')" class="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-500/30 transition">I Understand</button>
-            </div>
-        </div>
-    </div>
-    
-    <div id="apikey-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-        <div class="bg-white p-8 rounded-3xl max-w-md w-full shadow-2xl">
-            <h3 class="font-bold text-xl mb-2 text-slate-800">API Key Needed</h3>
-            <input type="password" id="api-key-input" class="w-full border border-slate-200 bg-slate-50 p-3 rounded-xl mb-4 focus:border-blue-500 outline-none" placeholder="Paste Gemini Key...">
-            <button id="save-key-btn" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition">Save & Continue</button>
-        </div>
-    </div>
+    <!-- OTHER MODALS -->
+    <div id="add-modal" class="hidden fixed inset-0 z-[80] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4"><div class="bg-white w-full max-w-sm p-8 rounded-[2rem] shadow-2xl fade-in"><h3 class="text-2xl font-bold text-slate-800 mb-6" id="modal-title">Add Item</h3><input type="text" id="modal-input-1" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 mb-4 outline-none focus:border-blue-500" placeholder="Name"><input type="text" id="modal-input-2" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 mb-6 outline-none focus:border-blue-500" placeholder="Time"><div class="flex gap-3"><button onclick="closeAddModal()" class="flex-1 py-3.5 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200">Cancel</button><button id="modal-save-btn" class="flex-1 py-3.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg">Save</button></div></div></div>
+    <div id="modal-contact" class="hidden fixed inset-0 z-[80] bg-slate-900/30 backdrop-blur-sm flex items-center justify-center p-4"><div class="bg-white w-full max-w-sm p-8 rounded-2xl shadow-2xl fade-in text-center relative"><button onclick="document.getElementById('modal-contact').classList.add('hidden')" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600">✕</button><div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-5 text-blue-600 text-2xl">📞</div><h3 class="text-2xl font-bold text-slate-800 mb-8">Support Center</h3><div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 mb-4"><div class="text-xs font-bold text-slate-400 uppercase">Emergency</div><div class="text-2xl font-mono font-bold text-slate-800">444 444 444 2</div></div><div class="bg-slate-50 p-5 rounded-2xl border border-slate-100"><div class="text-xs font-bold text-slate-400 uppercase">Email</div><div class="text-lg text-blue-600 font-medium">help@healthmate.ai</div></div></div></div>
+    <div id="emergency-modal" class="hidden fixed inset-0 z-[90] flex items-center justify-center p-4"><div class="absolute inset-0 bg-red-900/80 backdrop-blur-md"></div><div class="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden fade-in border-4 border-red-100"><div class="bg-red-50 p-8 text-center border-b border-red-100"><div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600 text-3xl shadow-sm">⚠️</div><h2 class="text-3xl font-bold text-red-900">Emergency Alert</h2></div><div class="p-8 max-h-[60vh] overflow-y-auto custom-scroll"><p id="emergency-msg" class="text-center text-slate-700 text-lg font-medium mb-6">Immediate attention recommended.</p><div id="hospitals-list" class="bg-slate-50 rounded-2xl p-6 text-slate-600 space-y-3 hidden border border-slate-200"></div></div><div class="p-6 bg-slate-50 border-t border-slate-100"><button onclick="document.getElementById('emergency-modal').classList.add('hidden')" class="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-500/30 transition">I Understand</button></div></div></div>
+    <div id="apikey-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"><div class="bg-white p-8 rounded-3xl max-w-md w-full shadow-2xl"><h3 class="font-bold text-xl mb-2 text-slate-800">API Key Needed</h3><input type="password" id="api-key-input" class="w-full border border-slate-200 bg-slate-50 p-3 rounded-xl mb-4 focus:border-blue-500 outline-none" placeholder="Paste Gemini Key..."><button id="save-key-btn" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition">Save & Continue</button></div></div>
+    <div id="toast" class="hidden fixed top-6 right-6 z-[110] bg-white border border-slate-100 shadow-2xl rounded-2xl p-4 flex items-center gap-4 animate-bounce"><div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-xl shadow-inner">✓</div><div><h4 class="font-bold text-slate-800" id="toast-title">Welcome!</h4><p class="text-xs text-slate-500" id="toast-msg">Confirmation sent.</p></div></div>
 
     <script>
-        const PLACEHOLDER_KEY = "AIzaSyCGCouG7iSEaWOXSti-EK8LNTTODG8prIU"; 
+        (function(){
+            // REPLACE WITH YOUR PUBLIC KEY
+            emailjs.init("1E0tGALYWBPOcge2Q"); 
+        })();
+
+        const PLACEHOLDER_KEY = "AIzaSyAPkjscsnwrIrIHyPc-B6iI9dKtXcjkIAg"; 
         let API_KEY = PLACEHOLDER_KEY;
-        
         let userProfile = {};
         let chatHistory = [];
         let imageBase64 = null;
         let waterCount = 0;
+        let medicines = [];
+        let appointments = [];
 
         const SYSTEM_PROMPT = `You are HealthMate AI. 1. Provide concise medical advice. 2. IF EMERGENCY: Start with [EMERGENCY]. List 3 hospitals in [User Location] inside [REFERRAL_INFO]...[/REFERRAL_INFO].`;
         const $ = (id) => document.getElementById(id);
 
+        // Safe text setter
+        const setText = (id, val) => { const el = $(id); if(el) el.textContent = val; };
+
         document.addEventListener('DOMContentLoaded', () => {
             if(!API_KEY || API_KEY.length < 10) $('apikey-modal').classList.remove('hidden');
-            $('save-key-btn').addEventListener('click', () => {
-                const val = $('api-key-input').value.trim();
-                if(val) { API_KEY = val; $('apikey-modal').classList.add('hidden'); }
-            });
+            $('save-key-btn').addEventListener('click', () => { const val = $('api-key-input').value.trim(); if(val) { API_KEY = val; $('apikey-modal').classList.add('hidden'); } });
 
+            // Login
             $('login-form').addEventListener('submit', (e) => {
                 e.preventDefault();
-                const name = $('login-name').value.trim();
+                const name = $('login-name')?.value.trim();
                 if(!name) return;
-                userProfile.name = name;
-                userProfile.age = $('login-age').value;
-                userProfile.loc = $('login-loc').value;
-                $('hero-name').textContent = name.split(' ')[0];
-                $('user-avatar').textContent = name.charAt(0).toUpperCase();
+                
+                userProfile = { 
+                    name: name, 
+                    age: $('login-age')?.value || "", 
+                    loc: $('login-loc')?.value || "", 
+                    sex: $('login-sex')?.value || "",
+                    phone: $('login-phone')?.value || "",
+                    email: $('login-email')?.value || "",
+                    height: $('login-height')?.value || "",
+                    weight: $('login-weight')?.value || "",
+                    lastLogin: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                };
+                
+                // UI Update
+                setText('hero-name', name.split(' ')[0]);
+                setText('user-avatar', name.charAt(0).toUpperCase());
+                
+                // Populate Profile Modal
+                setText('profile-name', userProfile.name);
+                setText('profile-avatar', userProfile.name.charAt(0).toUpperCase());
+                setText('profile-age', userProfile.age);
+                setText('profile-gender', userProfile.sex);
+                setText('profile-loc', userProfile.loc);
+                setText('profile-phone', userProfile.phone || "--");
+                setText('profile-email', userProfile.email || "--");
+                setText('profile-height', userProfile.height || "--");
+                setText('profile-weight', userProfile.weight || "--");
+                setText('profile-last-login', userProfile.lastLogin);
+
                 $('screen-login').classList.add('hidden');
                 $('screen-dashboard').classList.remove('hidden');
                 addMessage('assistant', `Hello ${name}. I am ready to help.`);
+                
+                // --- EMAIL SENDING LOGIC (REAL) ---
+                if(userProfile.email) {
+                     const templateParams = {
+                        to_name: userProfile.name,
+                        to_email: userProfile.email,
+                        message: "Welcome to HealthMate! Your virtual companion is ready."
+                    };
+                    
+                    // REPLACE SERVICE_ID AND TEMPLATE_ID WITH YOURS
+                    emailjs.send('service_yay05vp', 'template_kbnwhpr', templateParams)
+                        .then(function(response) {
+                           console.log('SUCCESS!', response.status, response.text);
+                           setText('toast-title', 'Email Sent!');
+                           setText('toast-msg', `Welcome email sent to ${userProfile.email}`);
+                           $('toast').classList.remove('hidden');
+                           setTimeout(() => $('toast').classList.add('hidden'), 5000);
+                        }, function(error) {
+                           console.log('FAILED...', error);
+                           // Fallback simulation
+                           setText('toast-title', 'Simulation Mode');
+                           setText('toast-msg', `Email would be sent to ${userProfile.email} (Add Keys)`);
+                           $('toast').classList.remove('hidden');
+                           setTimeout(() => $('toast').classList.add('hidden'), 5000);
+                        });
+                }
             });
 
-            // Navigation
+            // Nav Helpers
             window.showLogin = () => { $('screen-landing').classList.add('hidden'); $('screen-login').classList.remove('hidden'); };
             window.hideLogin = () => { $('screen-login').classList.add('hidden'); $('screen-landing').classList.remove('hidden'); };
-            
-            // Services Full Page
-            window.showServices = () => { 
-                $('screen-dashboard').classList.add('hidden'); 
-                $('screen-services').classList.remove('hidden'); 
-            };
-            window.hideServices = () => { 
-                $('screen-services').classList.add('hidden'); 
-                $('screen-dashboard').classList.remove('hidden'); 
-            };
-            
+            window.showServices = () => { $('screen-dashboard').classList.add('hidden'); $('screen-services').classList.remove('hidden'); };
+            window.hideServices = () => { $('screen-services').classList.add('hidden'); $('screen-dashboard').classList.remove('hidden'); };
             window.openChat = () => { $('tab-chat').classList.remove('hidden'); };
             window.closeChat = () => { $('tab-chat').classList.add('hidden'); };
+            window.openProfile = () => { $('modal-profile').classList.remove('hidden'); };
 
-            // Add Items Logic
+            // Add Item
             let modalType = '';
             window.openAddModal = (type) => {
                 modalType = type;
@@ -478,18 +481,23 @@
                     if(modalType === 'appointment') div.className = 'p-3 bg-purple-50/50 rounded-xl border border-purple-100';
                     
                     let content = `<div><p class="font-bold text-slate-700 text-sm">${name}</p><p class="text-xs text-slate-500">${time}</p></div>`;
-                    if(modalType === 'medicine') content += `<input type="checkbox" class="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500">`;
-                    
-                    div.innerHTML = content;
-                    
-                    if(modalType === 'medicine') $('med-list').appendChild(div);
-                    else $('appt-list').appendChild(div);
-                    
+                    if(modalType === 'medicine') {
+                        medicines.push({name, time});
+                        content += `<input type="checkbox" class="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500">`;
+                        div.innerHTML = content;
+                        $('med-list').appendChild(div);
+                        setText('profile-active-med', `${medicines.length} Active`);
+                    } else {
+                        appointments.push({name, time});
+                        div.innerHTML = content;
+                        $('appt-list').appendChild(div);
+                        setText('profile-next-appt', `${name} (${time})`);
+                    }
                     closeAddModal(); $('modal-input-1').value = ''; $('modal-input-2').value = '';
                 }
             });
 
-            // Water Logic
+            // Water
             window.addWater = () => {
                 waterCount++;
                 const width = Math.min((waterCount / 8) * 100, 100);
@@ -497,7 +505,7 @@
                 $('water-bar').style.width = `${width}%`;
             };
 
-            // Chat & Image
+            // Chat
             window.clearImage = () => { imageBase64 = null; $('image-preview-box').classList.add('hidden'); };
             $('file-input-chat').addEventListener('change', (e) => {
                  const file = e.target.files[0]; if(!file) return;
@@ -505,7 +513,6 @@
                  r.onload = (ev) => { imageBase64 = ev.target.result.split(',')[1]; $('img-preview').src = ev.target.result; $('image-preview-box').classList.remove('hidden'); };
                  r.readAsDataURL(file);
             });
-
             $('send-btn').addEventListener('click', sendMessage);
             $('chat-input').addEventListener('keydown', (e) => { if(e.key === 'Enter') sendMessage(); });
 
@@ -532,7 +539,7 @@
                         if (refMatch) { $('hospitals-list').innerHTML = refMatch[1].replace(/\n/g, '<br>'); $('hospitals-list').classList.remove('hidden'); }
                         $('emergency-modal').classList.remove('hidden');
                     }
-                } catch (e) { document.getElementById(id).remove(); addMessage('assistant', "Connection error. Check API Key."); }
+                } catch (e) { document.getElementById(id).remove(); addMessage('assistant', "Connection error."); }
             }
 
             function addMessage(role, text, img) {
@@ -546,12 +553,10 @@
 
             function addTyping() {
                 const id = 't' + Date.now();
-                const div = document.createElement('div');
-                div.id = id;
+                const div = document.createElement('div'); div.id = id;
                 div.className = 'bubble-assistant mr-auto p-4 w-20 flex gap-1 items-center mb-4';
                 div.innerHTML = '<div class="w-2 h-2 bg-slate-400 rounded-full typing-dot"></div><div class="w-2 h-2 bg-slate-400 rounded-full typing-dot"></div><div class="w-2 h-2 bg-slate-400 rounded-full typing-dot"></div>';
-                $('chat-container').appendChild(div);
-                return id;
+                $('chat-container').appendChild(div); return id;
             }
 
             // PDF
