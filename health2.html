@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthMate AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            /* Bluish Glassy Theme */
+            background: linear-gradient(120deg, #e0f2fe 0%, #f0f9ff 50%, #bfdbfe 100%);
+            height: 100vh;
+            overflow: hidden;
+            color: #1e293b;
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+            border-radius: 1.5rem;
+        }
+        .glass-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 15px 30px -5px rgba(59, 130, 246, 0.15);
+            border-color: #bfdbfe;
+        }
+
+        /* Inputs */
+        .glass-input {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid #cbd5e1;
+            transition: all 0.3s;
+        }
+        .glass-input:focus {
+            background: #fff;
+            border-color: #3b82f6;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Chat & Widget Elements */
+        .bubble-user { background: #2563eb; color: white; border-radius: 18px 18px 4px 18px; }
+        .bubble-assistant { background: white; color: #334155; border-radius: 18px 18px 18px 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        
+        /* Custom Scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .slide-up { animation: slideUp 0.4s ease-out forwards; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        .typing-dot { animation: bounce 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        
+        .mic-active { animation: pulse 1.5s infinite; background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #ef4444 !important; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+    </style>
+</head>
+<body>
+
+    <!-- 1. LANDING PAGE -->
+    <div id="screen-landing" class="absolute inset-0 z-50 bg-white/30 backdrop-blur-sm flex flex-col overflow-y-auto custom-scroll">
+        
+        <!-- Navbar -->
+        <nav class="w-full p-6 flex justify-between items-center max-w-7xl mx-auto sticky top-0 z-50">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-lg">H</div>
+                <span class="text-2xl font-bold text-slate-800 tracking-tight">HealthMate <span class="text-blue-600">AI</span></span>
+            </div>
+            <div>
+                <button onclick="showLogin()" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all shadow-md font-semibold">Patient Login</button>
+            </div>
+        </nav>
+
+        <!-- Hero Content -->
+        <div class="flex-1 flex flex-col items-center justify-center text-center px-6 pb-20 fade-in">
+            <div class="inline-block px-4 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full uppercase tracking-widest mb-6">
+                Smart • Secure • Personal
+            </div>
+            <h1 class="text-5xl lg:text-7xl font-extrabold text-slate-900 leading-tight mb-6">
+                Your Virtual <br/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Health Companion</span>
+            </h1>
+            <p class="text-slate-600 text-lg max-w-2xl mx-auto leading-relaxed mb-10">
+                Experience instant symptom analysis, track your medications, manage appointments, and get emergency guidance—all in one secure place.
+            </p>
+            <div class="flex gap-4">
+                <button onclick="showLogin()" class="px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-xl transition-all transform hover:-translate-y-1 text-lg">
+                    Get Started
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. LOGIN PAGE -->
+    <div id="screen-login" class="absolute inset-0 z-50 bg-white/40 backdrop-blur-md overflow-y-auto custom-scroll hidden">
+        <div class="min-h-full flex items-center justify-center p-6">
+            <div class="glass w-full max-w-md p-10 rounded-[2rem] shadow-2xl fade-in relative overflow-hidden">
+                 <button onclick="hideLogin()" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 transition">✕</button>
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 bg-gradient-to-tr from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold shadow-lg">H</div>
+                    <h1 class="text-3xl font-bold text-slate-800">HealthMate</h1>
+                    <p class="text-slate-500 mt-2 text-sm font-medium">Your Smart Virtual Health Companion</p>
+                </div>
+
+                <form id="login-form" class="space-y-5">
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase ml-1">Full Name</label>
+                        <input type="text" id="login-name" required class="glass-input w-full px-4 py-3.5 rounded-xl mt-1 text-slate-800" placeholder="e.g. Amit Kumar">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase ml-1">Age</label>
+                            <input type="number" id="login-age" required class="glass-input w-full px-4 py-3.5 rounded-xl mt-1 text-slate-800" placeholder="25">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase ml-1">Gender</label>
+                            <select id="login-sex" class="glass-input w-full px-4 py-3.5 rounded-xl mt-1 bg-white/50 outline-none cursor-pointer">
+                                <option>Male</option>
+                                <option>Female</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase ml-1">Location</label>
+                        <input type="text" id="login-loc" required class="glass-input w-full px-4 py-3.5 rounded-xl mt-1 text-slate-800" placeholder="City">
+                    </div>
+                    <button type="submit" class="w-full py-4 mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all transform hover:scale-[1.02] active:scale-95">
+                        Access Dashboard
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. DASHBOARD SCREEN -->
+    <div id="screen-dashboard" class="hidden absolute inset-0 z-0 flex flex-col bg-[#f0f7ff] overflow-y-auto custom-scroll">
+        
+        <!-- Navbar -->
+        <nav class="w-full p-6 flex justify-between items-center max-w-7xl mx-auto bg-white/50 backdrop-blur-md sticky top-0 z-40 rounded-b-3xl shadow-sm border-b border-white/50 mb-4">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-lg">H</div>
+                <span class="text-2xl font-bold text-slate-800 tracking-tight">HealthMate <span class="text-blue-600">AI</span></span>
+            </div>
+            <div class="flex items-center gap-6 text-sm font-medium text-slate-600">
+                <button onclick="showServices()" class="hover:text-blue-600 transition-colors px-4 py-2 rounded-lg hover:bg-blue-50 font-bold">Health Features</button>
+                <button onclick="document.getElementById('modal-contact').classList.remove('hidden')" class="hover:text-blue-600 transition-colors">Contact</button>
+                <button onclick="location.reload()" class="text-red-500 hover:underline ml-4">Logout</button>
+                <div id="user-avatar" class="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm border border-blue-200">U</div>
+            </div>
+        </nav>
+
+        <!-- Dashboard Content -->
+        <div class="flex-1 flex flex-col items-center justify-center p-6 fade-in min-h-[calc(100vh-120px)]">
+            
+             <!-- Welcome Section -->
+            <div class="text-center max-w-3xl w-full">
+                <div class="inline-block px-4 py-1.5 bg-blue-50 text-blue-600 text-xs font-bold rounded-full mb-6 border border-blue-100 shadow-sm">
+                    Active Session
+                </div>
+                <h1 class="text-5xl md:text-7xl font-extrabold text-slate-800 mb-6 tracking-tight leading-tight">
+                    Welcome back, <span id="hero-name" class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">User</span>
+                </h1>
+                <p class="text-xl text-slate-500 mb-12 font-light max-w-xl mx-auto leading-relaxed">
+                    I am ready to assist you with symptom analysis, health tracking, and emergency guidance.
+                </p>
+                
+                <button onclick="openChat()" class="group relative inline-flex items-center justify-center px-12 py-6 text-xl font-bold text-white transition-all duration-200 bg-blue-600 rounded-2xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 hover:bg-blue-700 hover:shadow-2xl hover:-translate-y-1">
+                    <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 01-2-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                    Start AI Consultation
+                </button>
+                
+                <div class="flex justify-center gap-8 mt-16 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                    <span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-500"></div> Secure</span>
+                    <span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-blue-500"></div> Private</span>
+                    <span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-purple-500"></div> Reliable</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 4. SERVICES PAGE (Full Screen Overlay) -->
+    <div id="screen-services" class="hidden absolute inset-0 z-[50] bg-[#f0f7ff] flex flex-col slide-up">
+        
+        <!-- Header with Exit Button -->
+        <div class="h-24 px-8 flex justify-between items-center bg-white/50 backdrop-blur-md sticky top-0 z-40">
+            <div>
+                <h2 class="text-3xl font-bold text-slate-800">Health Services</h2>
+                <p class="text-slate-500 text-sm">Manage your daily health routine</p>
+            </div>
+            <button onclick="hideServices()" class="p-3 rounded-full bg-white hover:bg-red-50 text-slate-400 hover:text-red-500 transition shadow-sm hover:shadow border border-slate-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+
+        <!-- Services Grid -->
+        <div class="flex-1 overflow-y-auto p-8 custom-scroll">
+            <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                
+                <!-- 1. Medicine Card -->
+                <div class="glass-card bg-white p-6 h-96 flex flex-col relative group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-2xl">💊</div>
+                        <button onclick="openAddModal('medicine')" class="z-10 w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-600 hover:text-white transition flex items-center justify-center font-bold text-xl shadow-sm cursor-pointer">+</button>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-xl mb-1">Medicines</h3>
+                    <p class="text-sm text-slate-400 mb-4">Daily Schedule</p>
+                    
+                    <div id="med-list" class="flex-1 overflow-y-auto custom-scroll space-y-3 pr-1">
+                        <!-- Mock Data -->
+                        <div class="p-3 bg-emerald-50/50 rounded-xl border border-emerald-100 flex justify-between items-center">
+                            <div>
+                                <p class="font-bold text-slate-700 text-sm">Vitamin C</p>
+                                <p class="text-xs text-slate-500">9:00 AM</p>
+                            </div>
+                            <input type="checkbox" class="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500">
+                        </div>
+                        <div class="p-3 bg-emerald-50/50 rounded-xl border border-emerald-100 flex justify-between items-center">
+                            <div>
+                                <p class="font-bold text-slate-700 text-sm">Omega 3</p>
+                                <p class="text-xs text-slate-500">1:00 PM</p>
+                            </div>
+                            <input type="checkbox" class="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Appointments Card -->
+                <div class="glass-card bg-white p-6 h-96 flex flex-col relative group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center text-purple-600 text-2xl">📅</div>
+                        <button onclick="openAddModal('appointment')" class="z-10 w-10 h-10 bg-purple-50 text-purple-600 rounded-xl hover:bg-purple-600 hover:text-white transition flex items-center justify-center font-bold text-xl shadow-sm cursor-pointer">+</button>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-xl mb-1">Appointments</h3>
+                    <p class="text-sm text-slate-400 mb-4">Upcoming Visits</p>
+                    
+                    <div id="appt-list" class="flex-1 overflow-y-auto custom-scroll space-y-3 pr-1">
+                         <!-- Mock Data -->
+                         <div class="p-3 bg-purple-50/50 rounded-xl border border-purple-100">
+                            <p class="font-bold text-slate-700 text-sm">Dr. Anjali Sharma</p>
+                            <p class="text-xs text-purple-600 font-medium mt-1">Cardiologist • Tomorrow 10 AM</p>
+                        </div>
+                         <div class="p-3 bg-purple-50/50 rounded-xl border border-purple-100">
+                            <p class="font-bold text-slate-700 text-sm">Dr. Rajesh Kumar</p>
+                            <p class="text-xs text-purple-600 font-medium mt-1">Dentist • Friday 4 PM</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Water Card -->
+                <div class="glass-card bg-white p-6 h-96 flex flex-col relative group items-center justify-center text-center" onclick="addWater()">
+                    <div class="w-24 h-24 bg-cyan-100 rounded-full flex items-center justify-center text-cyan-600 text-4xl mb-6 shadow-inner">💧</div>
+                    <h3 class="font-bold text-slate-800 text-2xl mb-1">Hydration</h3>
+                    <p class="text-sm text-slate-400 mb-6">Daily Goal</p>
+                    
+                    <div class="text-5xl font-extrabold text-cyan-500 mb-4" id="water-count-display">0<span class="text-2xl text-cyan-300">/8</span></div>
+                    
+                    <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden mb-4">
+                        <div id="water-bar" class="bg-cyan-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <p class="text-xs text-slate-400">Click anywhere to add glass</p>
+                </div>
+
+                <!-- 4. Report Vault -->
+                <div class="glass-card bg-white p-6 h-96 flex flex-col relative group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600 text-2xl">📂</div>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-xl mb-1">Report Vault</h3>
+                    <p class="text-sm text-slate-400 mb-6">Secure Storage</p>
+                    
+                    <div class="flex-1 bg-slate-50 rounded-xl border border-dashed border-slate-300 flex flex-col items-center justify-center p-4 text-center cursor-pointer hover:bg-orange-50 hover:border-orange-300 transition" onclick="document.getElementById('file-input').click()">
+                        <svg class="w-10 h-10 text-slate-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        <p class="text-sm font-bold text-slate-600">Upload Report</p>
+                        <p class="text-xs text-slate-400 mt-1">PDF, JPG, PNG</p>
+                    </div>
+                    <input type="file" id="file-input" class="hidden" onchange="alert('File secured in Local Vault')">
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- CHAT MODAL -->
+    <div id="tab-chat" class="hidden fixed inset-0 z-[60] bg-white flex flex-col animate-fade-in">
+        <div class="h-20 border-b border-slate-100 flex justify-between items-center px-6 md:px-10 bg-white/80 backdrop-blur-md">
+            <button onclick="closeChat()" class="text-slate-500 hover:text-blue-600 flex items-center gap-2 text-lg font-bold transition">
+                <div class="p-2 bg-slate-100 rounded-full hover:bg-blue-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></div>
+                Back to Home
+            </button>
+            <div class="flex items-center gap-3">
+                <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="font-bold text-slate-800 text-lg">Live AI Consultation</span>
+            </div>
+            <button id="download-pdf-btn" class="text-sm bg-blue-50 text-blue-600 px-4 py-2 rounded-xl font-bold hover:bg-blue-100 transition border border-blue-200">Export Report</button>
+        </div>
+
+        <div id="chat-container" class="flex-1 overflow-y-auto p-6 md:p-10 space-y-6 custom-scroll bg-slate-50">
+            <div class="text-center py-12 text-slate-400 text-sm">
+                <div class="w-20 h-20 bg-white rounded-full mx-auto mb-4 flex items-center justify-center shadow-sm border border-slate-100 text-4xl">🩺</div>
+                <p class="text-lg font-medium text-slate-600">AI Assistant Ready.</p>
+                <p>Describe your symptoms to begin.</p>
+            </div>
+        </div>
+
+        <div class="p-6 bg-white border-t border-slate-100">
+             <div id="image-preview-box" class="hidden mb-3 relative w-fit p-1 bg-slate-50 rounded-xl border border-slate-200 shadow-sm">
+                <img id="img-preview" class="h-20 rounded-lg">
+                <button onclick="clearImage()" class="absolute -top-2 -right-2 bg-slate-700 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center text-xs shadow-md hover:bg-red-500 transition">✕</button>
+            </div>
+            <div class="flex gap-3 items-center bg-slate-50 border border-slate-200 rounded-2xl p-2 pr-3 transition-all focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 max-w-5xl mx-auto">
+                <button onclick="document.getElementById('file-input-chat').click()" class="p-3 text-slate-400 hover:text-blue-600 hover:bg-white rounded-xl transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </button>
+                <input type="file" id="file-input-chat" class="hidden" accept="image/*">
+                
+                <input type="text" id="chat-input" class="flex-1 bg-transparent border-none focus:ring-0 text-slate-700 placeholder-slate-400 text-lg" placeholder="Type your symptoms here...">
+                
+                <button id="mic-btn" class="p-3 text-slate-400 hover:text-blue-600 hover:bg-white rounded-xl transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+                </button>
+                
+                <button id="send-btn" class="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md transition-all transform active:scale-95">
+                    <svg class="w-6 h-6 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS (Add Item, Contact, Emergency, API) -->
+    
+    <div id="add-modal" class="hidden fixed inset-0 z-[80] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm p-8 rounded-[2rem] shadow-2xl fade-in transform transition-all scale-100">
+            <h3 class="text-2xl font-bold text-slate-800 mb-6" id="modal-title">Add Item</h3>
+            <input type="text" id="modal-input-1" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 mb-4 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition" placeholder="Name">
+            <input type="text" id="modal-input-2" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 mb-6 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition" placeholder="Time">
+            <div class="flex gap-3">
+                <button onclick="closeAddModal()" class="flex-1 py-3.5 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition">Cancel</button>
+                <button id="modal-save-btn" class="flex-1 py-3.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-500/30">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-contact" class="hidden fixed inset-0 z-[80] bg-slate-900/30 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm p-8 rounded-2xl shadow-2xl fade-in text-center relative">
+            <button onclick="document.getElementById('modal-contact').classList.add('hidden')" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition">✕</button>
+            <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-5 text-blue-600 text-2xl">📞</div>
+            <h3 class="text-2xl font-bold text-slate-800 mb-8">Support Center</h3>
+            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 mb-4">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Emergency Hotline</div>
+                <div class="text-2xl font-mono font-bold text-slate-800">444 444 444 2</div>
+            </div>
+            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Email Support</div>
+                <div class="text-lg text-blue-600 font-medium">help@healthmate.ai</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="emergency-modal" class="hidden fixed inset-0 z-[90] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-red-900/80 backdrop-blur-md"></div>
+        <div class="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden fade-in border-4 border-red-100">
+            <div class="bg-red-50 p-8 text-center border-b border-red-100">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600 text-3xl shadow-sm">⚠️</div>
+                <h2 class="text-3xl font-bold text-red-900">Emergency Alert</h2>
+            </div>
+            <div class="p-8 max-h-[60vh] overflow-y-auto custom-scroll">
+                <p id="emergency-msg" class="text-center text-slate-700 text-lg font-medium mb-6">Immediate attention recommended.</p>
+                <div id="hospitals-list" class="bg-slate-50 rounded-2xl p-6 text-slate-600 space-y-3 hidden border border-slate-200"></div>
+            </div>
+            <div class="p-6 bg-slate-50 border-t border-slate-100">
+                <button onclick="document.getElementById('emergency-modal').classList.add('hidden')" class="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-500/30 transition">I Understand</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="apikey-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-3xl max-w-md w-full shadow-2xl">
+            <h3 class="font-bold text-xl mb-2 text-slate-800">API Key Needed</h3>
+            <input type="password" id="api-key-input" class="w-full border border-slate-200 bg-slate-50 p-3 rounded-xl mb-4 focus:border-blue-500 outline-none" placeholder="Paste Gemini Key...">
+            <button id="save-key-btn" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition">Save & Continue</button>
+        </div>
+    </div>
+
+    <script>
+        const PLACEHOLDER_KEY = "AIzaSyCGCouG7iSEaWOXSti-EK8LNTTODG8prIU"; 
+        let API_KEY = PLACEHOLDER_KEY;
+        
+        let userProfile = {};
+        let chatHistory = [];
+        let imageBase64 = null;
+        let waterCount = 0;
+
+        const SYSTEM_PROMPT = `You are HealthMate AI. 1. Provide concise medical advice. 2. IF EMERGENCY: Start with [EMERGENCY]. List 3 hospitals in [User Location] inside [REFERRAL_INFO]...[/REFERRAL_INFO].`;
+        const $ = (id) => document.getElementById(id);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if(!API_KEY || API_KEY.length < 10) $('apikey-modal').classList.remove('hidden');
+            $('save-key-btn').addEventListener('click', () => {
+                const val = $('api-key-input').value.trim();
+                if(val) { API_KEY = val; $('apikey-modal').classList.add('hidden'); }
+            });
+
+            $('login-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = $('login-name').value.trim();
+                if(!name) return;
+                userProfile.name = name;
+                userProfile.age = $('login-age').value;
+                userProfile.loc = $('login-loc').value;
+                $('hero-name').textContent = name.split(' ')[0];
+                $('user-avatar').textContent = name.charAt(0).toUpperCase();
+                $('screen-login').classList.add('hidden');
+                $('screen-dashboard').classList.remove('hidden');
+                addMessage('assistant', `Hello ${name}. I am ready to help.`);
+            });
+
+            // Navigation
+            window.showLogin = () => { $('screen-landing').classList.add('hidden'); $('screen-login').classList.remove('hidden'); };
+            window.hideLogin = () => { $('screen-login').classList.add('hidden'); $('screen-landing').classList.remove('hidden'); };
+            
+            // Services Full Page
+            window.showServices = () => { 
+                $('screen-dashboard').classList.add('hidden'); 
+                $('screen-services').classList.remove('hidden'); 
+            };
+            window.hideServices = () => { 
+                $('screen-services').classList.add('hidden'); 
+                $('screen-dashboard').classList.remove('hidden'); 
+            };
+            
+            window.openChat = () => { $('tab-chat').classList.remove('hidden'); };
+            window.closeChat = () => { $('tab-chat').classList.add('hidden'); };
+
+            // Add Items Logic
+            let modalType = '';
+            window.openAddModal = (type) => {
+                modalType = type;
+                $('modal-title').textContent = type === 'medicine' ? 'Add Medicine' : 'Add Appointment';
+                $('modal-input-1').placeholder = type === 'medicine' ? 'Medicine Name' : 'Doctor Name';
+                $('add-modal').classList.remove('hidden');
+            };
+            window.closeAddModal = () => $('add-modal').classList.add('hidden');
+
+            $('modal-save-btn').addEventListener('click', () => {
+                const name = $('modal-input-1').value;
+                const time = $('modal-input-2').value;
+                if(name && time) {
+                    const div = document.createElement('div');
+                    div.className = 'p-3 bg-emerald-50/50 rounded-xl border border-emerald-100 flex justify-between items-center animate-pulse';
+                    if(modalType === 'appointment') div.className = 'p-3 bg-purple-50/50 rounded-xl border border-purple-100';
+                    
+                    let content = `<div><p class="font-bold text-slate-700 text-sm">${name}</p><p class="text-xs text-slate-500">${time}</p></div>`;
+                    if(modalType === 'medicine') content += `<input type="checkbox" class="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500">`;
+                    
+                    div.innerHTML = content;
+                    
+                    if(modalType === 'medicine') $('med-list').appendChild(div);
+                    else $('appt-list').appendChild(div);
+                    
+                    closeAddModal(); $('modal-input-1').value = ''; $('modal-input-2').value = '';
+                }
+            });
+
+            // Water Logic
+            window.addWater = () => {
+                waterCount++;
+                const width = Math.min((waterCount / 8) * 100, 100);
+                $('water-count-display').innerHTML = `${waterCount}<span class="text-2xl text-cyan-300">/8</span>`;
+                $('water-bar').style.width = `${width}%`;
+            };
+
+            // Chat & Image
+            window.clearImage = () => { imageBase64 = null; $('image-preview-box').classList.add('hidden'); };
+            $('file-input-chat').addEventListener('change', (e) => {
+                 const file = e.target.files[0]; if(!file) return;
+                 const r = new FileReader();
+                 r.onload = (ev) => { imageBase64 = ev.target.result.split(',')[1]; $('img-preview').src = ev.target.result; $('image-preview-box').classList.remove('hidden'); };
+                 r.readAsDataURL(file);
+            });
+
+            $('send-btn').addEventListener('click', sendMessage);
+            $('chat-input').addEventListener('keydown', (e) => { if(e.key === 'Enter') sendMessage(); });
+
+            async function sendMessage() {
+                const text = $('chat-input').value.trim();
+                if(!text && !imageBase64) return;
+                addMessage('user', text, imageBase64);
+                $('chat-input').value = '';
+                const img = imageBase64; window.clearImage();
+                const id = addTyping();
+                try {
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
+                    const context = [{ role: "user", parts: [{ text: SYSTEM_PROMPT }] }, ...chatHistory, { role: "user", parts: [{ text: text || "Analyze Image" }] }];
+                    if(img) context[context.length-1].parts.push({ inlineData: { mimeType: "image/jpeg", data: img } });
+                    const res = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ contents: context }) });
+                    const data = await res.json();
+                    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Error connecting.";
+                    document.getElementById(id).remove();
+                    chatHistory.push({ role: "user", parts: [{ text }] }); chatHistory.push({ role: "model", parts: [{ text: reply }] });
+                    const clean = reply.replace(/\[EMERGENCY\]/g, "").replace(/\[REFERRAL_INFO\][\s\S]*?\[\/REFERRAL_INFO\]/g, "");
+                    addMessage('assistant', clean);
+                    if(reply.includes('[EMERGENCY]')) {
+                         const refMatch = reply.match(/\[REFERRAL_INFO\]([\s\S]*?)\[\/REFERRAL_INFO\]/);
+                        if (refMatch) { $('hospitals-list').innerHTML = refMatch[1].replace(/\n/g, '<br>'); $('hospitals-list').classList.remove('hidden'); }
+                        $('emergency-modal').classList.remove('hidden');
+                    }
+                } catch (e) { document.getElementById(id).remove(); addMessage('assistant', "Connection error. Check API Key."); }
+            }
+
+            function addMessage(role, text, img) {
+                const div = document.createElement('div');
+                div.className = `p-4 w-fit max-w-[85%] text-sm mb-4 leading-relaxed shadow-sm ${role === 'user' ? 'bubble-user ml-auto' : 'bubble-assistant mr-auto'}`;
+                if(img) div.innerHTML += `<img src="data:image/jpeg;base64,${img}" class="rounded-lg mb-3 max-h-40 block border border-white/20">`;
+                div.innerHTML += text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+                $('chat-container').appendChild(div);
+                $('chat-container').scrollTop = 99999;
+            }
+
+            function addTyping() {
+                const id = 't' + Date.now();
+                const div = document.createElement('div');
+                div.id = id;
+                div.className = 'bubble-assistant mr-auto p-4 w-20 flex gap-1 items-center mb-4';
+                div.innerHTML = '<div class="w-2 h-2 bg-slate-400 rounded-full typing-dot"></div><div class="w-2 h-2 bg-slate-400 rounded-full typing-dot"></div><div class="w-2 h-2 bg-slate-400 rounded-full typing-dot"></div>';
+                $('chat-container').appendChild(div);
+                return id;
+            }
+
+            // PDF
+            $('download-pdf-btn').addEventListener('click', () => {
+                const doc = new window.jspdf.jsPDF();
+                doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 40, 'F');
+                doc.setTextColor(255, 255, 255); doc.text("Medical Report", 20, 25);
+                doc.setTextColor(0, 0, 0); doc.text(`Patient: ${userProfile.name}`, 20, 50);
+                const hist = chatHistory.map(m => `${m.role}: ${m.parts[0].text}`).join('\n\n');
+                doc.text(doc.splitTextToSize(hist, 170), 20, 60);
+                doc.save('report.pdf');
+            });
+
+            // Mic
+            const micBtn = $('mic-btn');
+            if ('webkitSpeechRecognition' in window) {
+                const rec = new webkitSpeechRecognition(); rec.lang = 'en-US';
+                micBtn.addEventListener('click', () => { if(micBtn.classList.contains('mic-active')) rec.stop(); else rec.start(); });
+                rec.onstart = () => { micBtn.classList.add('mic-active'); $('chat-input').placeholder = "Listening..."; };
+                rec.onend = () => { micBtn.classList.remove('mic-active'); $('chat-input').placeholder = "Type or use mic..."; };
+                rec.onresult = (e) => { $('chat-input').value = e.results[0][0].transcript; sendMessage(); };
+            } else { micBtn.style.display = 'none'; }
+        });
+    </script>
+</body>
+</html>
